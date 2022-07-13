@@ -1,0 +1,18 @@
+{% extends "main/base.html" %}
+
+{% block title %}Weryfikacja{% endblock %}
+
+{% block content %}
+    <label for="code">Podaj kod weryfikacyjny otrzymany od administratora</label>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <button type="submit" name="verify" class="btn btn-dark">Weryfikuj</button>
+            </div>
+            <input type="text" id="code" name="code" class="form-control form-control-lg"/>
+        </div>
+    </form>
+    <br />
+    <p>Lub zaloguj się jako <a href="/">nauczyciel</a></p>
+{% endblock %}
