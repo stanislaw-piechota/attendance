@@ -1,1 +1,5 @@
 .git
+db.sqlite3
+qr_codes
+media
+.idea

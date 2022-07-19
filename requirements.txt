@@ -1,1 +1,4 @@
 django
+bcrypt
+pillow
+django-crispy-forms

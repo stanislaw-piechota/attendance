@@ -1,0 +1,109 @@
+{% extends "main/base.html" %}
+
+{% block title %}Obecność{% endblock %}
+
+{% block logout %}
+    <form method="POST">
+        {% csrf_token %}
+        <button name="logout" value="clicked" class="btn btn-secondary">Wyloguj się</button>
+    </form>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <h5>Dzień dobry, p. prof. {{teacher.name}} {{teacher.second_name}}</h5>
+        <p>Z którą klasą i w której sali ma Pan/i teraz lekcje? </p>
+        <div class="row col-5" style="padding-left: 0%;">
+            <div class="dropdown">
+                <button class="btn dropdown-toggle" name="class-toggle" id="class-toggle" type="button" value={{teacher.class_name}}
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {% if teacher.class_name != "NO" %}
+                        {{teacher.class_name}}
+                    {% else %}
+                        Klasa
+                    {% endif %}
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    {% for class_name in classes %}
+                        <p class="dropdown-item class-item" href="#">{{class_name}}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="dropdown" style="margin-left: 10px;">
+                <button class="btn dropdown-toggle" name="room-toggle" id="room-toggle" type="button" value={{teacher.room}}
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {% if not teacher.room %}
+                        Sala
+                    {% else %}
+                        {{teacher.room}}
+                    {% endif %}
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <p class="dropdown-item room-item" href="#">Brak</p>
+                    {% for room in rooms %}
+                        <p class="dropdown-item room-item" href="#">{{room}}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" name="update" value="clicked" class="btn btn-secondary" 
+                    style="margin-left: 20px;">Zatwierdź</button>
+            </form>
+        </div>
+    </div>
+    <br/><br/>
+    <div class="col-12 rounded" style="background-color: #eedddd;">
+        <div>
+            {% if not teacher.room or teacher.class_name == "NO" %}
+                <p style="padding: 10px;">Podgląd sali i obecności jest chwilowo niedostępny, proszę spróbować:</p>
+                <ul>
+                    <li>Wybrać salę, klasę i zatwierdzić</li>
+                    <li>Odświeżyć stronę</li>
+                    <li>Dla sali "Brak" oraz klasy "Klasa" podgląd nie jest wyświetlany (sala niezidentyfikowana)</li>
+                    <li>Zgłosić usterkę do administratora systemu</li>
+                </ul>
+            {% else %}
+                {% load time_tags %}
+                <div class="row d-flex justify-content-around p-2">
+                    <div class="rounded my-2 py-2" id="present" style="background-color: #bbffbb; min-width: 40%;">
+                        <h5 class="p-2">Obecni</h5>
+                        {% for student in present %}
+                            <p class="px-5 py-0 my-0">{{student.name}} {{student.second_name}} - {{student.last_time|hour}}</p>
+                        {% endfor %}
+                    </div>
+                    <div class="rounded my-2 py-2" id="absent" style="background-color: #ffbbbb; min-width:40%">
+                        <h5 class="p-2">Nieobecni</h5>
+                        {% for student in absent %}
+                            <p class="px-5 py-0 my-0">{{student.name}} {{student.second_name}}  - {{student.last_time|hour}}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_head %}
+    <style type="text/css">
+        #present * {
+            text-align: center;
+        }
+        #absent * {
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+
+{% block js_body %}
+    <script type="text/javascript">
+        $('.class-item').on("click", function(){
+            $('#class-toggle').text($(this).get(0).innerHTML)
+            document.cookie = "class="+$(this).get(0).innerHTML;
+        });
+        $('.room-item').on("click", function(){
+            $('#room-toggle').text($(this).get(0).innerHTML)
+            document.cookie = 'room='+$(this).get(0).innerHTML;
+        });
+    </script>
+{% endblock %}
