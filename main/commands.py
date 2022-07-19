@@ -30,7 +30,7 @@ if sys.argv[1] == 'generate':
 def draw_room(model, room):
     seats = model.objects.filter(room=room)
 
-    plan = [['' for _ in range(7)] for _ in range(7)]
+    plan = [['' for _ in range(8)] for _ in range(8)]
     st = ''
 
     for seat in seats:

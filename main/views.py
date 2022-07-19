@@ -127,7 +127,6 @@ def teacher(response):
         start = datetime(year=now.year, month=now.month, day=now.day, hour=now.hour, tzinfo=UTC)
         end = datetime(year=now.year, month=now.month, day=now.day, hour=now.hour, minute=45, tzinfo=UTC)
         for user in found[::]:
-            print(user.last_time)
             if start <= user.last_time <= end:
                 present.append(user)
         for user in all:
@@ -135,4 +134,13 @@ def teacher(response):
                 absent.append(user)
         context['present'] = present
         context['absent'] = absent
+        if response.COOKIES.get('simple-view') == 'true':
+            context['simple'] = True
+        else:
+            context['simple'] = False
+            seats = Seat.objects.filter(room=t.room)
+            rows, cols = [seat.row for seat in seats], [seat.col for seat in seats]
+            context['seats'] = seats
+            context['rows'] = reversed(range(1, max(rows)+1))
+            context['cols'] = range(1, max(cols)+1)
     return render(response, "main/teacher.html", context)

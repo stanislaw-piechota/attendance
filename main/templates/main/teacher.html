@@ -56,29 +56,63 @@
     <div class="col-12 rounded" style="background-color: #eedddd;">
         <div>
             {% if not teacher.room or teacher.class_name == "NO" %}
-                <p style="padding: 10px;">Podgląd sali i obecności jest chwilowo niedostępny, proszę spróbować:</p>
-                <ul>
+                <p class="mb-1 pt-2 pl-2">Podgląd sali i obecności jest chwilowo niedostępny, proszę spróbować:</p>
+                <ul class="py-2">
                     <li>Wybrać salę, klasę i zatwierdzić</li>
                     <li>Odświeżyć stronę</li>
                     <li>Dla sali "Brak" oraz klasy "Klasa" podgląd nie jest wyświetlany (sala niezidentyfikowana)</li>
                     <li>Zgłosić usterkę do administratora systemu</li>
                 </ul>
             {% else %}
+                <label for="desk-view" class="mt-2">Widok prosty</label>
+                <input type="checkbox" id="desk-view" name="desk-view" 
+                    {% if simple %}
+                        checked
+                    {% endif %} 
+                />
                 {% load time_tags %}
-                <div class="row d-flex justify-content-around p-2">
-                    <div class="rounded my-2 py-2" id="present" style="background-color: #bbffbb; min-width: 40%;">
-                        <h5 class="p-2">Obecni</h5>
-                        {% for student in present %}
-                            <p class="px-5 py-0 my-0">{{student.name}} {{student.second_name}} - {{student.last_time|hour}}</p>
+                {% if simple %}
+                    <div class="row d-flex justify-content-around p-2">
+                        <div class="rounded my-2 py-2" id="present" style="background-color: #bbffbb; min-width: 40%;">
+                            <h5 class="p-2">Obecni</h5>
+                            {% for student in present %}
+                                <p class="px-4 py-0 my-0"><b>{{student.name}} {{student.second_name}}</b> - {{student.last_time|hour}}
+                                </p>
+                            {% endfor %}
+                        </div>
+                        <div class="rounded my-2 py-2" id="absent" style="background-color: #ffbbbb; min-width:40%">
+                            <h5 class="p-2">Nieobecni</h5>
+                            {% for student in absent %}
+                                <p class="px-4 py-0 my-0">{{student.name}} {{student.second_name}}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    {% load seat_tags %}
+                    <div class="p-2 justify-content-center" id="class-view">
+                        {% for i in rows %}
+                            <div class="row">
+                            {% for seat in seats|get_row:i %}
+                                <div id="{{seat.row}}-{{seat.col}}"
+                                    {% if not seat.empty %}
+                                        style="background-color: #bbbbbb;min-width: 9em; min-height: 6em;"
+                                    {% else %}
+                                        style="min-width: 9em; min-height: 6em;"
+                                    {% endif %}
+                                class="m-1">
+                                <p class="text-center m-0 p-2"></p>
+                                </div>
+                            {% endfor %}
+                            </div>
                         {% endfor %}
                     </div>
-                    <div class="rounded my-2 py-2" id="absent" style="background-color: #ffbbbb; min-width:40%">
-                        <h5 class="p-2">Nieobecni</h5>
+                    <div class="row p-4">
+                        <h5 class="">Nieobecni:</h5>
                         {% for student in absent %}
-                            <p class="px-5 py-0 my-0">{{student.name}} {{student.second_name}}  - {{student.last_time|hour}}</p>
+                            {{student.name}} {{student.second_name}},
                         {% endfor %}
                     </div>
-                </div>
+                {% endif %}
             {% endif %}
         </div>
     </div>
@@ -92,11 +126,18 @@
         #absent * {
             text-align: center;
         }
+
     </style>
 {% endblock %}
 
 {% block js_body %}
     <script type="text/javascript">
+        $(document).ready(function (){
+            {% for student in present %}
+                console.log($('#{{student.row}}-{{student.col}}').get(0).children[0].innerHTML=
+                    "{{student.name}}<br/>{{student.second_name}}<br/>{{student.last_time|hour}}");
+            {% endfor %}
+        });
         $('.class-item').on("click", function(){
             $('#class-toggle').text($(this).get(0).innerHTML)
             document.cookie = "class="+$(this).get(0).innerHTML;
@@ -104,6 +145,10 @@
         $('.room-item').on("click", function(){
             $('#room-toggle').text($(this).get(0).innerHTML)
             document.cookie = 'room='+$(this).get(0).innerHTML;
+        });
+        $('#desk-view').on("click", function(){
+            document.cookie = 'simple-view='+$(this).get(0).checked;
+            window.location.reload();
         });
     </script>
 {% endblock %}

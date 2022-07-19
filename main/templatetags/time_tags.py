@@ -2,6 +2,9 @@ from django import template
 register = template.Library()
 
 def hour(value):
-    return value.strftime('%Y.%m.%d %H:%M:%S')
+    append = ''
+    if value.minute > 15:
+        append = ' (sp)'
+    return value.strftime('%H:%M:%S')+append
 
 register.filter('hour', hour)
