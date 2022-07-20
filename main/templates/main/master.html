@@ -133,7 +133,6 @@
 
             for (let student of s1){
                 if (s2.includes(student)){
-                    console.log(s3);
                     if (class_name == "Klasa"){
                         students.push(student);
                     } else {
@@ -143,7 +142,6 @@
                     }
                 }
             }
-            console.log(students);
             return students;
         }
 
@@ -158,7 +156,7 @@
             }
 
             for (let t of res){
-                html += "<div class='col-6 col-sm-3'><a class='badge badge-light' href=''>"+t+"</a></div>";
+                html += "<div class='col-6 col-sm-3'><a class='badge badge-light' target='_self' href='/t/"+t+"'>"+t+"</a></div>";
             }
             html += '</div>';
 
@@ -169,7 +167,7 @@
             let res = get_results_s();
 
             for (let s of res){
-                html += "<div class='col-6 col-sm-3'><a class='badge badge-light' href=''>"+s+"</a></div>";
+                html += "<div class='col-6 col-sm-3'><a class='badge badge-light' target='_self' href='/s/"+s+"'>"+s+"</a></div>";
             }
             html += '</div>';
 

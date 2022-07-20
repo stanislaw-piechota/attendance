@@ -4,7 +4,7 @@ from .models import *
 from bcrypt import checkpw
 from datetime import datetime, timedelta
 from .forms import *
-from pytz import timezone, UTC
+from pytz import UTC
 
 def index(response):
     # user verified
@@ -107,6 +107,10 @@ def teacher(response):
         try:
             if room not in ["Sala", "Brak"]:
                 t.room = int(room)
+                dup_teachers = Teacher.objects.filter(room=t.room)
+                for teach in dup_teachers:
+                    teach.room = 0
+                    teach.save()
             else:
                 raise ValueError
         except Exception as e:
@@ -175,3 +179,69 @@ def master(response):
         "teachers": Teacher.objects.all()
     }
     return render(response, 'main/master.html', context)
+
+def user_s(response, full_name):
+    if not response.session.get('auth') or not response.session.get('id'):
+        return redirect('/../../login')
+
+    t = Teacher.objects.filter(id=int(response.session.get('id')))[0]
+    if not t.master:
+        return redirect('/../../teacher')
+
+    if response.method == "POST":
+        if response.POST.get('logout'):
+            response.session['auth'] = False
+            response.session['id'] = None
+            return redirect('/../../login')
+        elif response.POST.get('master'):
+            return redirect('/../../teacher')
+        elif response.POST.get('panel'):
+            return redirect('/../../headmaster')
+
+    data = full_name.split(' ')
+    if len(data) == 3:
+        name = f'{data[0]} {data[1]}'
+        second_name = data[3]
+    else:
+        name, second_name = data
+    students = Student.objects.filter(name=name, second_name=second_name)
+    if len(students) == 0:
+        return redirect('../../headmaster')
+    
+    teachers = Teacher.objects.filter(room=students[0].room)
+    if len(teachers) == 0:
+        teacher = None
+    else:
+        teacher = teachers[0]
+
+    return render(response, "main/user_s.html", {"student":students[0], "teacher": teacher})
+
+def user_t(response, full_name):
+    if not response.session.get('auth') or not response.session.get('id'):
+        return redirect('/../../login')
+
+    t = Teacher.objects.filter(id=int(response.session.get('id')))[0]
+    if not t.master:
+        return redirect('/../../teacher')
+
+    if response.method == "POST":
+        if response.POST.get('logout'):
+            response.session['auth'] = False
+            response.session['id'] = None
+            return redirect('/../../login')
+        elif response.POST.get('master'):
+            return redirect('/../../teacher')
+        elif response.POST.get('panel'):
+            return redirect('/../../headmaster')
+
+    data = full_name.split(' ')
+    if len(data) == 3:
+        name = f'{data[0]} {data[1]}'
+        second_name = data[3]
+    else:
+        name, second_name = data
+    teachers = Teacher.objects.filter(name=name, second_name=second_name)
+    if len(teachers) == 0:
+        return redirect('../../headmaster')
+
+    return render(response, "main/user_t.html", {"teacher": teachers[0]})

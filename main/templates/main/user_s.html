@@ -1,0 +1,32 @@
+{% extends "main/base.html" %}
+
+{% block title %}Profil {{student.name}} {{student.second_name}} {{student.class_name}}{% endblock %}
+
+{% block logout %}
+    <form method="POST">
+        {% csrf_token %}
+        <button name="panel" value="clicked" class="btn btn-secondary mr-2">Powrót do panelu</button>
+        <button name="master" value="clicked" class="btn btn-secondary mr-2">Widok nauczycielski</button>
+        <button name="logout" value="clicked" class="btn btn-secondary">Wyloguj się</button>
+    </form>
+{% endblock %}
+
+{% block content %}
+    {% load time_tags %}
+    <p class="mb-1">Imię: <b>{{student.name}}</b></p>
+    <p class="mb-1">Nazwisko: <b>{{student.second_name}}</b></p>
+    <p class="mb-1">Pełne imię: <b>{{student.name}} {{student.second_name}}</b></p>
+    <p class="mb-4">Klasa: <b>{{student.class_name}}</b></p>
+    <p class="mb-1">Ostatnie logowanie: <b>{{student.last_time|hour}}</b></p>
+    <p class="mb-4">Miejsce: Sala <b>{{student.room}}</b>, Rząd <b>{{student.row}}</b>, Kolumna 
+        <b>{{student.col}}</b></p>
+    <p class="mb-1">Ma lekcję z: <b> 
+        {% if teacher %}
+            p. prof. {{teacher.name}} {{teacher.second_name}}
+        {% else %}
+            Nieokreślony
+        {% endif %}
+    </b></p>
+
+
+{% endblock %}
