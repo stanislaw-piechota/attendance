@@ -1,0 +1,192 @@
+{% extends "main/base.html" %}
+
+{% block title %}Panel kontrolny{% endblock %}
+
+{% block logout %}
+    <form method="POST">
+        {% csrf_token %}
+        <button name="master" value="clicked" class="btn btn-secondary mr-2">Widok nauczycielski</button>
+        <button name="logout" value="clicked" class="btn btn-secondary">Wyloguj się</button>
+    </form>
+{% endblock %}
+
+{% block content %}
+    <div class="col-12">
+        <h5>Dzień dobry, p. prof. {{teacher.name}} {{teacher.second_name}}</h5>
+        <p>Jako nauczyciel uprawniony, ma Pan/i dostęp do panelu kontrolnego. Można wyszukać tu dane dotyczące 
+            godziny sprawdzania obecności nauczycieli i sale które zajmują, a także wyszukać dane uczniów 
+            i ich dokładne miejsce (sala, rząd, kolumna) [również zdjęcie w następnych wersjach platformy], 
+            w którym się znajdują</p>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group mr-3 ml-1">
+                    <input type="text" id="name" name="name" placeholder="Imię" class="form-control"/>
+                </div>
+                <div class="form-group mr-3">
+                    <input type="text" id="second-name" name="second-name" placeholder="Nazwisko" class="form-control"/>
+                </div>
+                <div class="form-group mr-3">
+                    <select name="class" id="class" class="form-control">
+                        <option>Klasa</option>
+                        {% for class in classes %}
+                            <option>{{class}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </form>
+        <div class="mt-3">
+            <h5>Wyniki wyszukiwania</h5>
+            <h6 class="mt-4">Nauczyciele</h6><hr>
+            <div id="teachers"></div>
+            <h6 class="mt-4">Uczniowie</h6><hr>
+            <div id="students"></div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js_body %}
+    <script type="text/javascript">
+        let t_div = $('#teachers'), s_div = $('#students');
+
+        function get_names(str){
+            let teachers = [];
+
+            if ($('#class').val() != "Klasa") return [];
+
+            {% for teacher in teachers %}
+                var name = "{{teacher.name}}";
+                if (name.includes(str)){
+                    teachers.push("{{teacher}}");   
+                }
+            {% endfor %}
+
+            return teachers;
+        }
+        function get_second_names(str){
+            let teachers = [];
+            if ($('#class').val() != "Klasa") return [];
+
+            {% for teacher in teachers %}
+                var name = "{{teacher.second_name}}";
+                if (name.includes(str)){
+                    teachers.push("{{teacher}}");   
+                }
+            {% endfor %}
+
+            return teachers;
+        }
+        function get_names_s(str){
+            let students = [];
+
+            {% for student in students %}
+                var name = "{{student.name}}";
+                if (name.includes(str)){
+                    students.push("{{student}}");   
+                }
+            {% endfor %}
+
+            return students;
+        }
+        function get_second_names_s(str){
+            let students = [];
+
+            {% for student in students %}
+                var name = "{{student.second_name}}";
+                if (name.includes(str)){
+                    students.push("{{student}}");   
+                }
+            {% endfor %}
+
+            return students;
+        }
+        function get_classes(str){
+            let students = [];
+
+            {% for student in students %}
+                var class_name = "{{student.class_name}}";
+                if (class_name.includes(str)){
+                    students.push("{{student}}");   
+                }
+            {% endfor %}
+
+            return students;
+        }
+
+        function get_results_t(){
+            let name = $('#name').val(), s_name = $('#second-name').val(), teachers = [];
+            let t1 = get_names(name), t2 = get_second_names(s_name);
+
+            for (let teacher of t1){
+                if (t2.includes(teacher)){
+                    teachers.push(teacher);
+                }
+            }
+
+            return teachers;
+        }
+        function get_results_s(){
+            let name = $('#name').val(), s_name = $('#second-name').val(), class_name = $('#class').val(),
+                students = [];
+            let s1 = get_names_s(name), s2 = get_second_names_s(s_name), s3 = get_classes(class_name);
+
+            for (let student of s1){
+                if (s2.includes(student)){
+                    console.log(s3);
+                    if (class_name == "Klasa"){
+                        students.push(student);
+                    } else {
+                        if (s3.includes(student)){
+                            students.push(student);
+                        }
+                    }
+                }
+            }
+            console.log(students);
+            return students;
+        }
+
+        function update_t(){
+            html = "<div class='row ml-1'>";
+            let res = get_results_t();
+
+            if (res.length == 0) {
+                html += "<div class='col-6 col-sm-3'><p class='badge badge-light'>Brak wyników</p></div>";
+                t_div[0].innerHTML = html;
+                return;
+            }
+
+            for (let t of res){
+                html += "<div class='col-6 col-sm-3'><a class='badge badge-light' href=''>"+t+"</a></div>";
+            }
+            html += '</div>';
+
+            t_div[0].innerHTML = html;
+        }
+        function update_s(){
+            html = "<div class='row ml-1'>";
+            let res = get_results_s();
+
+            for (let s of res){
+                html += "<div class='col-6 col-sm-3'><a class='badge badge-light' href=''>"+s+"</a></div>";
+            }
+            html += '</div>';
+
+            s_div[0].innerHTML = html;
+        }
+        
+        $('#name').bind("keyup", function(e){
+            update_t();
+            update_s();
+        });
+        $('#second-name').bind("keyup", function(){
+            update_t();
+            update_s();
+        });
+        $('#class').bind("change", function(){
+            update_t();
+            update_s();
+        });
+    </script>
+{% endblock %}

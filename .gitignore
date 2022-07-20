@@ -2,4 +2,5 @@
 db.sqlite3
 qr_codes
 media
+media/*
 .idea

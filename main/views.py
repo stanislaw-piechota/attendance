@@ -111,9 +111,12 @@ def teacher(response):
                 raise ValueError
         except Exception as e:
             t.room = 0
+        t.last_activity = datetime.now()
 
         t.save()
         return redirect('/teacher')
+    elif response.method == "POST" and response.POST.get('master'):
+        return redirect('/headmaster')
 
     classes = sorted(list(set([student.class_name for student in Student.objects.all()])))
     rooms = sorted(list(set([seat.room for seat in Seat.objects.all()])))
@@ -144,3 +147,31 @@ def teacher(response):
             context['rows'] = reversed(range(1, max(rows)+1))
             context['cols'] = range(1, max(cols)+1)
     return render(response, "main/teacher.html", context)
+
+
+def master(response):
+    if not response.session.get('auth') or not response.session.get('id'):
+        return redirect('/login')
+
+    t = Teacher.objects.filter(id=int(response.session.get('id')))[0]
+    if not t.master:
+        return redirect('/teacher')
+
+    if response.method == "POST":
+        if response.POST.get('logout'):
+            response.session['auth'] = False
+            response.session['id'] = None
+            return redirect('/login')
+        elif response.POST.get('master'):
+            return redirect('/teacher')
+        elif response.POST.get('search'):
+            return redirect('/headmaster')
+
+    classes = sorted(list(set([student.class_name for student in Student.objects.all()])))
+    context = {
+        "teacher": t,
+        "classes": classes,
+        "students": Student.objects.all(),
+        "teachers": Teacher.objects.all()
+    }
+    return render(response, 'main/master.html', context)

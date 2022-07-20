@@ -17,7 +17,9 @@ class Student(models.Model):
     row = models.IntegerField(default=0)
     col = models.IntegerField(default=0)
     last_time = models.DateTimeField(default=datetime.now())
-    class_name = models.CharField(max_length=3, default='3E')
+    class_name = models.CharField(max_length=3, default='1A')
+    eng_group = models.CharField(max_length=4, default='ang1')
+    lang_group = models.CharField(max_length=4, default='nie1')
 
     def __str__(self):
         return f'{self.name} {self.second_name}'
@@ -31,6 +33,8 @@ class Teacher(models.Model):
     pin = models.IntegerField(null=True)
     room = models.IntegerField(null=True)
     class_name = models.CharField(max_length=3, null=True)
+    last_activity = models.DateTimeField(default=datetime.now())
+    master = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.name} {self.second_name}'

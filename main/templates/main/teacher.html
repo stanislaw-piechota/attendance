@@ -5,6 +5,9 @@
 {% block logout %}
     <form method="POST">
         {% csrf_token %}
+        {% if teacher.master %}
+            <button name="master" value="clicked" class="btn btn-secondary mr-2">Widok dyrektorski</button>
+        {% endif %}
         <button name="logout" value="clicked" class="btn btn-secondary">Wyloguj się</button>
     </form>
 {% endblock %}
@@ -134,10 +137,11 @@
     <script type="text/javascript">
         $(document).ready(function (){
             {% for student in present %}
-                console.log($('#{{student.row}}-{{student.col}}').get(0).children[0].innerHTML=
-                    "{{student.name}}<br/>{{student.second_name}}<br/>{{student.last_time|hour}}");
+                $('#{{student.row}}-{{student.col}}').get(0).children[0].innerHTML=
+                    "{{student.name}}<br/>{{student.second_name}}<br/>{{student.last_time|hour}}";
             {% endfor %}
         });
+        /* jshint ignore:end */
         $('.class-item').on("click", function(){
             $('#class-toggle').text($(this).get(0).innerHTML)
             document.cookie = "class="+$(this).get(0).innerHTML;
