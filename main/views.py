@@ -4,7 +4,8 @@ from .models import *
 from bcrypt import checkpw
 from datetime import datetime, timedelta
 from .forms import *
-from pytz import UTC
+from pytz import timezone, UTC
+tz = timezone('Europe/Warsaw')
 
 def index(response):
     # user verified
