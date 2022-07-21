@@ -31,8 +31,8 @@ class Teacher(models.Model):
     second_name = models.CharField(max_length=50, null=True)
     login = models.CharField(max_length=100, null=True)
     pin = models.IntegerField(null=True)
-    room = models.IntegerField(null=True)
-    class_name = models.CharField(max_length=3, null=True)
+    room = models.IntegerField(null=True, default=0)
+    class_name = models.CharField(max_length=3, null=True, default='NO')
     last_activity = models.DateTimeField(default=datetime.now())
     master = models.BooleanField(default=False)
 
