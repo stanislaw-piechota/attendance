@@ -1,4 +1,3 @@
-from cv2 import VideoCapture
 from django.shortcuts import render, redirect
 from .models import *
 from bcrypt import checkpw
