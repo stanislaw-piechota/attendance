@@ -2,60 +2,37 @@
 
 {% block title %}Skanowanie{% endblock %}
 
-{% block js_head %}
-    <script type="text/javascript" scr="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/3.3.3/adapter.min.js"> </script>
-    <script type="text/javascript" scr="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"></script>
-{% endblock %}
-
 {% block content %}
-    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
-
-    <div class="row">
-        <div class="col-8">
-            <p style="font-weight:bold; text-align:center;">Zeskanuj kod widoczny na ławce</p>
-            <video id="preview" width="100%"></video>
-        </div>
-        <div class="col-3 input-group justify-content-center align-self-center">
-            <div class="row">
+    <div class="row d-flex justify-content-center">
+        <div class="col-3 justify-content-center">
+            <div>
+                <h6 style="text-align:center;">Sprawdź czy dane się pobrane z kodu się zgadzają</h6>
+                <p style="text-align:center;font-size: x-small;">*Dane aktualizują się wraz z wyświetleniem komunikatu</p>
+            </div><br/><br/>
+            <div id="center" class="row">
                 <div class="col justify-content-center">
-                    <b>Sala</b>
+                    <p><b>Sala</b></p>
                     <p name="room">{{room}}</p>
                 </div>
                 <div class="col">
-                    <b>Rząd</b>
+                    <p><b>Rząd</b></p>
                     <p name="row">{{row}}</p>
                 </div>
                 <div class="col">
-                    <b>Kolumna</b>
+                    <p><b>Kolumna</b></p>
                     <p name="column">{{col}}</p>
                 </div>
-            </div><br />
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="text" id="text" readonly="" placeholder="scan qrcode" class="form-control" />
-                <button type="submit" name="save" value="clicked" class="btn btn-lg btn-danger align-middle">OBECNY</button>
-            </form>
+            </div>
         </div>
     </div>
 {% endblock %}
 
-{% block js_body %}
-    <script>
-        let scanner = new Instascan.Scanner({video: document.getElementById('preview')});
-        Instascan.Camera.getCameras().then(function(cameras){
-            if (cameras.length > 0){
-                scanner.start(cameras[0]);
-            } else {
-                alert('No cameras found');
-            }
-        }).catch(function(e) {
-            console.log(e);
-        });
 
-        scanner.addListener('scan', function(c){
-            document.cookie = "qr_data="+c;
-            document.getElementById('text').value=c
-            location.reload(true);
-        });
-    </script>
+{% block js_head %}
+    <style type="text/css">
+        #center p {
+            text-align: center;
+            margin-bottom: 1px;
+        }
+    </style>
 {% endblock %}

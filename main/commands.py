@@ -11,13 +11,18 @@ check_names:    sprawdź poprawnośc loginów nauczycieli''')
     sys.exit(1)
 
 if sys.argv[1] == 'generate':
+    address = sys.argv[2]
+    new = address.split('//')[1].split(':')[0]
     rooms = [27, 28, 29, 101, 102, 103, 104, 105, 106, 107, 201, 202, 203, 204, 205, 206, 207, 301, 303, 304, 306, 307]
 
+    if not os.path.exists(f'../qr_codes/{new}'):
+        os.mkdir(f"../qr_codes/{new}")
     for room in rooms:
-        os.mkdir(f'../qr_codes/{room}')
+        if not os.path.exists(f'../qr_codes/{new}/{room}'):
+            os.mkdir(f'../qr_codes/{new}/{room}')
         for row in range(1, 6):
             for col in range(1, 7):
-                st = f'{room}#{row}#{col}#'
+                st = f'{address}/student/?room={room}&row={row}&col={col}&checksum='
                 if row and col:
                     check = room*row//col
                 else:
@@ -25,7 +30,7 @@ if sys.argv[1] == 'generate':
                 st += b.hashpw(str(check).encode(), b.gensalt()).decode()
                 img = qr.make(st)
                 print(f'{room},{row},{col}')
-                img.save(f'../qr_codes/{room}/{row},{col}.png')
+                img.save(f'../qr_codes/{new}/{room}/{row},{col}.png')
 
 def draw_room(model, room):
     seats = model.objects.filter(room=room)

@@ -1,11 +1,40 @@
-from multiprocessing.dummy import Value
+from cv2 import VideoCapture
 from django.shortcuts import render, redirect
 from .models import *
 from bcrypt import checkpw
 from datetime import datetime, timedelta
 from .forms import *
-from pytz import timezone, UTC
-tz = timezone('Europe/Warsaw')
+from pytz import UTC
+
+def student(response):
+    if not response.COOKIES.get('attendance_verified'):
+        return redirect('/')
+
+    try:
+        error=None
+        student = Student.objects.filter(id=int(response.COOKIES.get('attendance_verified')))[0]
+        room = int(response.GET.get('room'))
+        row = int(response.GET.get('row'))
+        col = int(response.GET.get('col'))
+        checksum = response.GET.get('checksum')
+
+        if row and col:
+            check = room*row//col
+        else:
+            check = room+2137
+
+        if checkpw(str(check).encode(), checksum.encode()):
+            student.room, student.row, student.col = room, row, col
+            student.last_time = datetime.now()
+            student.save()
+            return render(response, "main/home.html", {"room": room, "row":row, "col":col})
+        else:
+            raise ValueError
+
+    except:
+        error = "Nieprawidłowe dane"
+
+    return render(response, "main/error.html", {"error": error})
 
 def index(response):
     # user verified
@@ -25,43 +54,6 @@ def index(response):
             return render(response, "main/verify.html", {"error": "Kod nie istnieje"})
 
     return render(response, "main/verify.html", {"error": ""})
-
-
-def data_verify(data):
-    room, row, col, hash = data.split('#')
-    room, row, col = int(room), int(row), int(col)
-
-    if row and col:
-        checksum = room*row//col
-    else:
-        checksum = room+2137
-
-    return room, row, col, checkpw(str(checksum).encode(), hash.encode())
-
-
-def student(response):
-    # not verified user
-    if not response.COOKIES.get('attendance_verified'):
-        return redirect("/")
-
-    # sent form
-    if response.method == "POST":
-        stud = Student.objects.all().filter(id=response.COOKIES.get('attendance_verified'))[0]
-        data = data_verify(response.COOKIES.get('qr_data'))
-        stud.room = data[0]
-        stud.row = data[1]
-        stud.col = data[2]
-        stud.last_time = datetime.now()
-        stud.save()
-        return redirect("/success")
-
-    # user sent QR
-    if response.COOKIES.get('qr_data'):
-        data = data_verify(response.COOKIES.get('qr_data'))
-        if data[3]:
-            return render(response, "main/home.html", {"room": data[0], "row": data[1], "col": data[2]})
-
-    return render(response, "main/home.html", {"room": 0, "row": 0, "col": 0})
 
 
 def success(response):
@@ -132,9 +124,10 @@ def teacher(response):
         found = Student.objects.filter(class_name=t.class_name, room=t.room)
         present, absent = [], []
         now = datetime.now()
-        start = datetime(year=now.year, month=now.month, day=now.day, hour=now.hour, tzinfo=UTC)
-        end = datetime(year=now.year, month=now.month, day=now.day, hour=now.hour, minute=45, tzinfo=UTC)
+        start = datetime(year=now.year, month=now.month, day=now.day, hour=now.hour)
+        end = datetime(year=now.year, month=now.month, day=now.day, hour=now.hour, minute=45)
         for user in found[::]:
+            print(start, user.last_time, end)
             if start <= user.last_time <= end:
                 present.append(user)
         for user in all:
