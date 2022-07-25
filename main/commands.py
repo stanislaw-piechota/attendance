@@ -52,7 +52,7 @@ def draw_room(model, room):
     print(st)
 
 def create_room(model, room):
-    for i in range(7):
+    for i in range(8):
         row = input()
         for j, sign in enumerate(row):
             if sign == ' ':

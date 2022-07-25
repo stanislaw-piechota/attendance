@@ -230,7 +230,7 @@ def user_t(response, full_name):
     data = full_name.split(' ')
     if len(data) == 3:
         name = f'{data[0]} {data[1]}'
-        second_name = data[3]
+        second_name = data[2]
     else:
         name, second_name = data
     teachers = Teacher.objects.filter(name=name, second_name=second_name)
