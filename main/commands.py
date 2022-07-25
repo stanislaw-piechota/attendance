@@ -62,3 +62,16 @@ def create_room(model, room):
 
             model.objects.create(room=room, row=i+1, col=j+1, empty=empty)
             
+def create_qr(model, room):
+    seats = model.objects.filter(room=room)
+    if not os.path.exists(str(room)):
+        os.mkdir(str(room))
+    for seat in seats:
+        if seat.row != 0 and seat.col != 0:
+            check = seat.room*seat.row//seat.col
+        else:
+            check = seat.room+2137
+        if not seat.empty:
+            code = f'https://plopl-attendance.herokuapp.com/student/?room={room}&row={seat.row}&col={seat.col}&checksum={b.hashpw(str(check).encode(), b.gensalt()).decode()}'
+            img = qr.make(code)
+            img.save(f'{room}/{seat.row},{seat.col}.png')
