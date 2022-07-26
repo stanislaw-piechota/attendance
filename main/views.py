@@ -50,7 +50,7 @@ def index(response):
 
 
 def success(response):
-    if not response.COOKIES.get('attendance_verify'):
+    if not response.COOKIES.get('attendance_verified'):
         return redirect('/')
 
     return render(response, "main/success.html", {})
