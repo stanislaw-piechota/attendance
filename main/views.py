@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import *
-from bcrypt import checkpw
+from .commands import decrypt
 from datetime import datetime, timedelta
 from .forms import *
 from pytz import UTC
@@ -17,12 +17,7 @@ def student(response):
         col = int(response.GET.get('col'))
         checksum = response.GET.get('checksum')
 
-        if row and col:
-            check = room*row//col
-        else:
-            check = room+2137
-
-        if checkpw(str(check).encode(), checksum.encode()):
+        if decrypt(checksum) == f'{room}/{row}/{col}':
             student.room, student.row, student.col = room, row, col
             student.last_time = datetime.now()
             student.save()
