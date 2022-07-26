@@ -3,7 +3,6 @@ from .models import *
 from .commands import decrypt
 from datetime import datetime, timedelta
 from .forms import *
-from pytz import UTC
 
 def student(response):
     if not response.COOKIES.get('attendance_verified'):
@@ -42,7 +41,7 @@ def index(response):
             if len(codes):
                 id = codes[0].user_id
                 user = Student.objects.all().filter(id=id)
-                request = redirect("/student")
+                request = redirect("/success")
                 request.set_cookie("attendance_verified", str(id), expires=datetime.now()+timedelta(days=400))
                 return request
             return render(response, "main/verify.html", {"error": "Kod nie istnieje"})

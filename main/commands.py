@@ -37,19 +37,22 @@ def create_qr(model, room):
     if not os.path.exists(str(room)):
         os.mkdir(str(room))
     for seat in seats:
-        if seat.row != 0 and seat.col != 0:
-            check = seat.room*seat.row//seat.col
-        else:
-            check = seat.room+2137
         if not seat.empty:
             print(seat.room, seat.row, seat.col)
             checksum = encrypt(f'{seat.room}/{seat.row}/{seat.col}')
+            print(checksum, decrypt(checksum))
             code = f'https://plopl-attendance.herokuapp.com/student/?room={room}&row={seat.row}&col={seat.col}&checksum={checksum}'
             img = qr.make(code)
             img.save(f'{room}/{seat.row},{seat.col}.png')
 
 def QRs():
     from .models import Seat as model
+
+    try:
+        os.chdir('qr_codes/plopl-attendance.herokuapp.com')
+    except:
+        pass
+
     rooms = [27,28,29,101,102,103,104,105,106,107,201,202,203,204,205,206,207,301,303,305,306,307]
     for room in rooms:
         create_qr(model, room)
@@ -80,13 +83,14 @@ def encrypt(string: str):
     add = [0, 24, 57]
     
     for i, code in enumerate(codes):
-        code += choice(add)
-        if (97<=code<=122 and code+i>122) or (64<=code<=90 and code+i>90) or (40<=code<=59 and code+i>59):
-            new_code = code-i
+        if code+i>59:
+            code -= i
         else:
-            new_code = code+i
+            code += i
 
-        result += chr(new_code)
+        code += choice(add)
+
+        result += chr(code)
     return result
 
 def decrypt(string: str):
@@ -94,15 +98,15 @@ def decrypt(string: str):
     result = ''
 
     for i, code in enumerate(codes):
-        if (97<=code<=122 and code-i<90) or (64<=code<=90 and code-i<64) or (40<=code<=59 and code+i<40):
-            code += i
-        else:
-            code -= i
-
         if 64<=code<=90:
             code -= 24
         elif 97<=code<=122:
             code -= 57
+
+        if code-i<47:
+            code += i
+        else:
+            code -= i
 
         result += chr(code)
     return result
