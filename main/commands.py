@@ -72,6 +72,27 @@ def create_qr(model, room):
         else:
             check = seat.room+2137
         if not seat.empty:
+            print(seat.room, seat.row, seat.col)
             code = f'https://plopl-attendance.herokuapp.com/student/?room={room}&row={seat.row}&col={seat.col}&checksum={b.hashpw(str(check).encode(), b.gensalt()).decode()}'
             img = qr.make(code)
             img.save(f'{room}/{seat.row},{seat.col}.png')
+
+def create_seats(model):
+    with open('seats.txt') as file:
+        data = file.read().split('\n')
+    
+    ind = 0
+    room = 0
+    row = 0
+    while ind < len(data):
+        line = data[ind]
+        if ('.' not in line) and (' ' not in line):
+            room = int(line)
+            row = 0
+            print(f'--{room}--')
+        else:
+            row += 1
+            for col, sign in enumerate(line):
+                print(f'{row}, {col}')
+                model.objects.create(room=room, row=row, col=col+1, empty=sign==' ')
+        ind += 1
