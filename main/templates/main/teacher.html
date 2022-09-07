@@ -98,9 +98,9 @@
                             {% for seat in seats|get_row:i %}
                                 <div id="{{seat.row}}-{{seat.col}}"
                                     {% if not seat.empty %}
-                                        style="background-color: #bbbbbb;min-width: 9em; min-height: 6em;"
+                                        style="background-color: #bbbbbb;min-width: 7em; min-height: 6em;"
                                     {% else %}
-                                        style="min-width: 9em; min-height: 6em;"
+                                        style="min-width: 7em; min-height: 6em;"
                                     {% endif %}
                                 class="m-1">
                                 <p class="text-center m-0 p-2"></p>
