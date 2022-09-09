@@ -119,6 +119,8 @@ def create_report(present, absent, class_name, room, teacher):
     date = dt.now()
     if date.hour < 8 or date.hour > 15:
         return
+    if not os.path.exists('main/reports'):
+        os.mkdir('main/reports')
     filepath = f"main/reports/{date.strftime('%d-%m-%Y')}"
     if not os.path.exists(filepath):
         os.mkdir(filepath)
