@@ -1,8 +1,11 @@
-from django.shortcuts import render, redirect
+from tabnanny import check
+from django.shortcuts import render, redirect, HttpResponse
 from .models import *
-from .commands import decrypt
-from datetime import datetime, timedelta
+from .commands import decrypt, create_report, delete_raports
 from .forms import *
+import os
+import mimetypes
+from datetime import timedelta, datetime as dt
 
 def student(response):
     if not response.COOKIES.get('attendance_verified'):
@@ -15,6 +18,7 @@ def student(response):
         row = int(response.GET.get('row'))
         col = int(response.GET.get('col'))
         checksum = response.GET.get('checksum')
+        print(decrypt(checksum))
 
         if decrypt(checksum) == f'{room}/{row}/{col}':
             student.room, student.row, student.col = room, row, col
@@ -105,8 +109,25 @@ def teacher(response):
 
         t.save()
         return redirect('/teacher')
+    elif response.method == "POST" and response.POST.get('report'):
+        return redirect('/report')
     elif response.method == "POST" and response.POST.get('master'):
         return redirect('/headmaster')
+    elif response.method == "POST" and response.POST.get('atd-submit'):
+        if response.POST.get('name') and response.POST.get('row') and response.POST.get('col'):
+            try:
+                name, second_name = response.POST.get('name').split(' ')
+                student = Student.objects.filter(class_name=t.class_name, name=name, second_name=second_name)
+                if len(student) > 0:
+                    student = student[0]
+                    student.room = t.room
+                    student.col = int(response.POST.get('col'))
+                    student.row = int(response.POST.get('row'))
+                    student.last_time = dt.now()
+                    student.save()
+            except ValueError:
+                pass
+        return redirect('./')
 
     classes = sorted(list(set([student.class_name for student in Student.objects.all()])))
     rooms = sorted(list(set([seat.room for seat in Seat.objects.all()])))
@@ -120,7 +141,6 @@ def teacher(response):
         start = datetime(year=now.year, month=now.month, day=now.day, hour=now.hour)
         end = datetime(year=now.year, month=now.month, day=now.day, hour=now.hour, minute=45)
         for user in found[::]:
-            print(start, user.last_time, end)
             if start <= user.last_time <= end:
                 present.append(user)
         for user in all:
@@ -137,6 +157,7 @@ def teacher(response):
             context['seats'] = seats
             context['rows'] = reversed(range(1, max(rows)+1))
             context['cols'] = range(1, max(cols)+1)
+        create_report(present, absent, t.class_name, t.room, t)
     return render(response, "main/teacher.html", context)
 
 
@@ -157,6 +178,8 @@ def master(response):
             return redirect('/teacher')
         elif response.POST.get('search'):
             return redirect('/headmaster')
+        elif response.POST.get('report'):
+            return redirect('/report')
 
     classes = sorted(list(set([student.class_name for student in Student.objects.all()])))
     context = {
@@ -232,3 +255,36 @@ def user_t(response, full_name):
         return redirect('../../headmaster')
 
     return render(response, "main/user_t.html", {"teacher": teachers[0]})
+
+def report(response):
+    if not response.session.get('auth') or not response.session.get('id'):
+        return redirect('/login')
+
+    t = Teacher.objects.filter(id=response.session.get('id'))[0]
+    if response.method == "POST":
+        if response.POST.get('logout'):
+            response.session['auth'] = False
+            response.session['id'] = None
+            return redirect('/login')
+        elif response.POST.get('report'):
+            return redirect('/teacher')
+        elif response.POST.get('master'):
+            return redirect('/headmaster')
+
+    delete_raports()
+    files = {}
+    for day in os.listdir('main/reports'):
+        files[day] = {}
+        for class_name in os.listdir(f'main/reports/{day}'):
+            files[day][class_name] = []
+            for lesson in os.listdir(f'main/reports/{day}/{class_name}'):
+                files[day][class_name].append(lesson)
+    return render(response, "main/report.html", {"teacher":t, "files":files})
+
+def download_file(request, date, class_name, filename):
+    filepath = f'main/reports/{date}/{class_name}/{filename}'
+    path = open(filepath, 'rb')
+    mime_type, _ = mimetypes.guess_type(filepath)
+    response = HttpResponse(path, content_type=mime_type)
+    response['Content-Disposition'] = "attachment; filename=%s" % filename
+    return response

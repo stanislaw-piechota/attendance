@@ -1,6 +1,10 @@
+import encodings
 import qrcode as qr
 import os
 from random import choice
+from datetime import datetime as dt
+import json
+from shutil import rmtree
 
 def draw_room(model, room):
     seats = model.objects.filter(room=room)
@@ -111,4 +115,41 @@ def decrypt(string: str):
         result += chr(code)
     return result
 
+def create_report(present, absent, class_name, room, teacher):
+    date = dt.now()
+    if date.hour < 8 or date.hour > 15:
+        return
+    filepath = f"main/reports/{date.strftime('%d-%m-%Y')}"
+    if not os.path.exists(filepath):
+        os.mkdir(filepath)
+    payload = {}
+    payload['lesson'] = date.hour-7
+    payload['teacher'] = f"{teacher.name} {teacher.second_name}"
+    payload['created'] = date.strftime("%H:%M:%S, %d.%m.%Y")
+    payload['class'] = class_name
+    payload['classroom'] = room
+    payload['present'], payload['absent'] = [], []
+    for person in present:
+        payload['present'].append({
+            "name": person.name,
+            "second name": person.second_name,
+            "activity": person.last_time.strftime("%H:%M:%S, %d.%m.%Y")
+        })
+    for person in absent:
+        payload['absent'].append({
+            "name": person.name,
+            "second name": person.second_name
+        })
+    filepath += f"/{class_name}"
+    if not os.path.exists(filepath):
+        os.mkdir(filepath)
+    filepath += f"/lesson-{payload['lesson']}.json"
+    with open(filepath, "wb") as file:
+        file.write(json.dumps(payload, indent=2, ensure_ascii=False).encode('utf-8'))
         
+def delete_raports():
+    date = dt.now()
+    for folder in os.listdir('main/reports')[::]:
+        f_date = dt.strptime(folder, '%d-%m-%Y')
+        if (date-f_date).days > 30:
+            rmtree(f'./main/reports/{folder}')

@@ -1,5 +1,6 @@
-from tabnanny import check
 from django import template
+import mimetypes
+from django.shortcuts import HttpResponse
 register = template.Library()
 
 def get_row(value, i):

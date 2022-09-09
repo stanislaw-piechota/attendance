@@ -8,6 +8,7 @@
         {% if teacher.master %}
             <button name="master" value="clicked" class="btn btn-secondary mr-2">Widok dyrektorski</button>
         {% endif %}
+        <button name="report" value="clicked" class="btn btn-secondary mr-2">Raport obecności</button>
         <button name="logout" value="clicked" class="btn btn-secondary">Wyloguj się</button>
     </form>
 {% endblock %}
@@ -119,6 +120,32 @@
             {% endif %}
         </div>
     </div>
+
+    <p class="mt-5"><b>Zatwierdź obecność ręcznie</b> (Wszystkie pola są wymagane)</p>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="input-group mb-3 mt-0">
+            <div  class="input-group-prepend">
+                <span class="input-group-text">Imię i nazwisko ucznia</span>
+            </div>
+            <input type="text" name="name" class="form-control" />
+        </div>
+        <div class="input-group mb-3 mt-0">
+            <div  class="input-group-prepend">
+                <span class="input-group-text">Rząd</span>
+            </div>
+            <input type="text" name="row" class="form-control" />
+        </div>
+        <div class="input-group mb-3 mt-0">
+            <div  class="input-group-prepend">
+                <span class="input-group-text">Kolumna</span>
+            </div>
+            <input type="text" name="col" class="form-control" />
+            <div class="input-group-append">
+                <button name="atd-submit" value="submit" type="submit" class="btn btn-danger">Zatwierdź obecność</button>
+            </div>
+        </div>
+    </form>
 {% endblock %}
 
 {% block js_head %}

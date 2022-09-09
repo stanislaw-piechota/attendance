@@ -1,0 +1,64 @@
+{% extends "main/base.html" %}
+
+{% block title %}Raporty obecności{% endblock %}
+
+{% block logout %}
+    <form method="POST">
+        {% csrf_token %}
+        {% if teacher.master %}
+            <button name="master" value="clicked" class="btn btn-secondary mr-2">Widok dyrektorski</button>
+        {% endif %}
+        <button name="report" value="clicked" class="btn btn-secondary mr-2">Widok nauczycielski</button>
+        <button name="logout" value="clicked" class="btn btn-secondary">Wyloguj się</button>
+    </form>
+{% endblock %}
+
+{% block content %}
+    <div id="accordion">
+        {% if not files %}
+            <h5>Brak raportów</h5>
+        {% endif %}
+        {% for date, classes in files.items %}
+            <div class="card">
+                <div class="card-header" id="heading{{date}}">
+                    <h5 class="mb-0">
+                        <button class="btn" data-toggle="collapse" data-target="#collapse{{date}}" 
+                            aria-expanded="true" aria-controls="collapse{{date}}">
+                            {{date}}
+                        </button>
+                    </h5>
+                </div>
+        
+                <div id="collapse{{date}}" class="collapse collapsed" aria-labelledby="heading{{date}}"
+                    data-parent="#accordion">
+                    <div class="card-body">
+                        {% for class, docs in classes.items %}
+                            <div id="accordion-{{date}}">
+                                <div class="card">
+                                    <div class="card-header" id="heading{{date}}-{{class}}">
+                                        <h5 class="mb-0">
+                                            <button class="btn" data-toggle="collapse" 
+                                                data-target="#collapse{{date}}-{{class}}" 
+                                                aria-expanded="true" aria-controls="collapse{{date}}-{{class}}">
+                                                {{class}}
+                                            </button>
+                                        </h5>
+                                    </div>
+                            
+                                    <div id="collapse{{date}}-{{class}}" class="collapse collapsed" aria-labelledby="heading{{date}}-{{class}}" 
+                                        data-parent="#accordion-{{date}}">
+                                        <div class="card-body">
+                                            {% for doc in docs %}
+                                                <a href="../download/{{date}}/{{class}}/{{doc}}">{{class}}/{{date}}/{{doc}}</a><br/>
+                                            {% endfor %}                  
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
