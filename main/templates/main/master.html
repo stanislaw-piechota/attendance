@@ -57,9 +57,7 @@
 
         {% for teacher in teachers %}
             var name = "{{teacher.name}}";
-            if (name.includes(str)){
-                teachers.push("{{teacher|safe}}");   
-            }
+            if (name.includes(str)) teachers.push("{{teacher|safe}}");   
         {% endfor %}
 
             return teachers;
