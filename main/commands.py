@@ -1,4 +1,3 @@
-from base64 import encode
 import qrcode as qr
 import os
 from random import choice
