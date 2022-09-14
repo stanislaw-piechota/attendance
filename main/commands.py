@@ -65,7 +65,7 @@ def QRs():
         create_qr(model, room)
 
 def create_seats(model):
-    with open('seats.txt') as file:
+    with open('secured_files/seats.txt') as file:
         data = file.read().split('\n')
     
     ind = 0
@@ -196,8 +196,17 @@ Nie odpowiadaj na tą wiadomość.
     with open('secured_files/to_send.txt', 'w') as file:
         print('done')
 
-def create_db_users(st):
+def create_db_users(st, offset=0):
     with open('secured_files/to_send.txt', encoding='utf-8') as file:
-        for line in file.readlines():
+        for i, line in enumerate(file.readlines()):
             data = line.split(',')
-            st.objects.create(name=data[1], second_name=data[0], class_name=f"{23-int(data[2])}{data[3].capitalize()}")
+            st.objects.create(id=i+1+offset, name=data[1], second_name=data[0], class_name=f"{23-int(data[2])}{data[3].capitalize()}")
+
+def create_teachers(t):
+    with open('secured_files/teachers.txt', enocding='utf-8') as file:
+        for i, line in enumerate(file.readlines()):
+            line.replace('\n', '')
+            data = line.split(',')
+            master = True if len(data)==3 else False
+            login = f"{unidecode(data[0].split(' ')[0])}.{unidecode(data[1].split('-')[0])}"
+            t.objects.create(id=i+1, name=data[0], second_name=data[1], login=login, master=master)
