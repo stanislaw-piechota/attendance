@@ -55,12 +55,12 @@
 
             if ($('#class').val() != "Klasa") return [];
 
-            {% for teacher in teachers %}
-                var name = "{{teacher.name}}";
-                if (name.includes(str)){
-                    teachers.push("{{teacher.name}} {{teacher.second_name}}");   
-                }
-            {% endfor %}
+        {% for teacher in teachers %}
+            var name = "{{teacher.name}}";
+            if (name.includes(str)){
+                teachers.push("{{teacher|safe}}");   
+            }
+        {% endfor %}
 
             return teachers;
         }
