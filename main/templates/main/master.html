@@ -71,9 +71,7 @@
             {% for teacher in teachers %}
                 var name = "{{teacher.second_name}}";
                 if (name.includes(str)){
-                    teachers.push(
-                        "{{teacher.name}} {{teacher.second_name}}"
-                    );   
+                    teachers.push("{{teacher.name}} {{teacher.second_name}}");   
                 }
             {% endfor %}
 
