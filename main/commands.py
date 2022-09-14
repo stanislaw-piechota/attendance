@@ -168,9 +168,13 @@ def send_mails(st, codes):
             server.login(mail, password)
             for line in file.readlines():
                 data = line.split(',')
-                receive_mail = f'u{data[2]}{data[3].lower()}{unidecode(data[0][0:3]).capitalize()}\
-{unidecode(data[1][:3]).capitalize()}@liceum.p.lodz.pl'
-                name, second_name, class_name = data[0], data[1], f"{22+1-int(data[2])}{data[3].upper()}"
+                if line == '':
+                    continue
+                if len(data[3]) > 1:
+                    data[3] = data[3][0]
+                receive_mail = f'u{data[2]}{data[3].lower()}{unidecode(data[1][0:3]).capitalize()}\
+{unidecode(data[0][:3]).capitalize()}@liceum.p.lodz.pl'
+                name, second_name, class_name = data[1], data[0], f"{22+1-int(data[2])}{data[3].upper()}"
                 print(receive_mail, name, second_name, class_name)
                 id = st.objects.filter(name=name, second_name=second_name, class_name=class_name)[0].id
                 code = codes.objects.get(user_id=str(id))
@@ -197,4 +201,4 @@ def create_db_users(st):
     with open('secured_files/to_send.txt', encoding='utf-8') as file:
         for line in file.readlines():
             data = line.split(',')
-            st.objects.create(name=data[0], second_name=data[1], class_name=f"{23-int(data[2])}{data[3].capitalize()}")
+            st.objects.create(name=data[1], second_name=data[0], class_name=f"{23-int(data[2])}{data[3].capitalize()}")
