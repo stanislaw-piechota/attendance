@@ -203,7 +203,7 @@ def create_db_users(st, offset=0):
             st.objects.create(id=i+1+offset, name=data[1], second_name=data[0], class_name=f"{23-int(data[2])}{data[3].capitalize()}")
 
 def create_teachers(t):
-    with open('secured_files/teachers.txt', enocding='utf-8') as file:
+    with open('secured_files/teachers.txt', encoding='utf-8') as file:
         for i, line in enumerate(file.readlines()):
             line.replace('\n', '')
             data = line.split(',')
