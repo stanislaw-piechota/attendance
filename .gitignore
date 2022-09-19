@@ -1,8 +1,9 @@
 .git
 db.sqlite3
 qr_codes
-!secured_files
+secured_files
 media
 main/__pycache__
 attendance/__pycache__
 staticfiles
+reports
